@@ -37,7 +37,7 @@ Fecha de activación: 21-11-2026.
 {
   "data": {
     "users": 2,
-    "pets": 0,
+    "pets": 1,
     "identifiers": 0,
     "orders": 0,
     "subscriptions": 0
@@ -45,7 +45,7 @@ Fecha de activación: 21-11-2026.
 }
 ```
 
-Los recuentos reflejan el estado en el momento de la prueba, no valores fijos.
+Los recuentos reflejan el estado en el momento de la prueba, no valores fijos. La cifra de mascotas se lee actualmente de `public.pets`, porque los registros reales todavía no se han migrado a `petlink.pets`.
 
 ## Pendiente
 
