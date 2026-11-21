@@ -361,9 +361,10 @@ async function loadPets(){
   const first=petsTotal===0?0:petsPage*USER_PAGE_SIZE+1,last=Math.min((petsPage+1)*USER_PAGE_SIZE,petsTotal);
   el("petsPageInfo").textContent=petsTotal?"Mostrando "+first+"–"+last+" de "+petsTotal+" mascotas":"0 mascotas";
   el("petsPrev").disabled=petsPage===0;el("petsNext").disabled=(petsPage+1)*USER_PAGE_SIZE>=petsTotal;
-  await loadIdentifierAudit();
+  let auditWarning="";
+  try{await loadIdentifierAudit();}catch(auditError){auditWarning=" No se pudo actualizar el historial de movimientos." ;el("identifierAuditRows").innerHTML='<tr><td colspan="5">No se pudo cargar el historial.</td></tr>';}
   const separate=result.data_sources?.identifiers_linked_to_current_pets===false;
-  petsStatus(separate?"Perfiles actuales e inventario QR/NFC consultados. Las etiquetas se muestran por separado hasta validar la migración de datos.":"Datos actualizados.");
+  petsStatus((separate?"Perfiles actuales e inventario QR/NFC consultados. Las etiquetas se muestran por separado hasta validar la migración de datos.":"Datos actualizados.")+auditWarning,auditWarning.length>0);
  }catch(e){petsStatus(e.message,true);el("petsRows").innerHTML='<tr><td colspan="6"><div class="users-empty">No se han podido cargar las mascotas.</div></td></tr>';el("identifierRows").innerHTML='<tr><td colspan="7"><div class="users-empty">No se ha podido cargar el inventario.</div></td></tr>';el("petsPageInfo").textContent="—";el("petsPrev").disabled=true;el("petsNext").disabled=true;}
  finally{el("petsSearchBtn").disabled=false;}
 }
