@@ -20,7 +20,7 @@ Supabase proyecto Huëllik Project, región eu-west-1, PostgreSQL 17.
 - Dos usuarios coinciden entre auth.users, public.profiles y petlink.app_users.
 - Hay una mascota y un contacto en public; las tablas de negocio petlink están vacías.
 - RLS está habilitado en ambas estructuras. petlink carece de políticas y de privilegio USAGE para anon/authenticated; no abrirlo directamente.
-- Funciones Edge desplegadas: `admin-overview`, `admin-promotions`, `validate-promo` y `admin-users`, todas con JWT obligatorio (excepto futuros webhooks firmados).
+- Funciones Edge desplegadas: `admin-overview`, `admin-promotions`, `validate-promo`, `admin-users` y `admin-pets`, todas con JWT obligatorio (excepto futuros webhooks firmados).
 - No hay buckets de Storage.
 - La vista pública de petlink no tiene permisos de lectura para anon/authenticated.
 - La RPC pública de perfil es SECURITY DEFINER y actualmente ejecutable por anon/authenticated. Debe limitarse y probarse.
@@ -50,3 +50,13 @@ Supabase proyecto Huëllik Project, región eu-west-1, PostgreSQL 17.
 - El identificador de la cuenta del propietario debe fijarse desde un entorno seguro antes de habilitar administración.
 - Stripe queda desactivado hasta que el propietario decida abrir/configurar una cuenta.
 - Las etiquetas físicas y el proveedor se pueden integrar después; el perfil digital funciona sin ellas.
+
+
+## Módulo administrativo de mascotas y QR/NFC v1
+- UI de solo lectura añadida a admin.html en develop/huellik-v2.
+- RPC public.huellik_admin_pets_v1: owner-only, SECURITY DEFINER con search_path vacío y permisos EXECUTE revocados a PUBLIC/anon.
+- Edge Function admin-pets activa con verify_jwt=true, valida sesión y llama a la RPC con JWT del usuario.
+- Mascotas desde public.pets; identificadores y escaneos desde petlink.identifiers / petlink.scans.
+- No se exponen alertas médicas, teléfonos, emails de contacto, ubicaciones ni user agents.
+- La estructura actual de mascotas no está migrada a petlink. No se simula asociación de identificadores.
+- Pendiente prueba desde navegador con sesión real del propietario y pruebas de preview.
