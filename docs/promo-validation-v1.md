@@ -25,3 +25,12 @@ El catálogo y los precios de etiquetas aún no están cerrados y los precios de
 - RPC SECURITY DEFINER con `search_path = ''`, referencias cualificadas y permisos solo authenticated.
 - Edge Function con JWT obligatorio y sin service_role.
 - No hay cambios en `main`, no se habilita Stripe.
+
+
+## Pruebas en Supabase
+- Código válido y coincidencia de alcance: correcto.
+- Alcance incorrecto: rechazado.
+- Límite global/per-user al existir reserva activa: rechazado.
+- Código desactivado: rechazado.
+- Pruebas ejecutadas dentro de una transacción revertida; no quedó ningún código ni canje de prueba.
+- `anon` no puede ejecutar la RPC; `authenticated` sí. Ningún rol cliente puede leer directamente las tablas privadas.
