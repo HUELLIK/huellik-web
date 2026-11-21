@@ -39,6 +39,17 @@ td strong{color:var(--navy)}
 .user-pill{display:inline-flex;border-radius:30px;padding:5px 8px;font-size:10px;font-weight:800;background:#edf4f1;color:#387d70}
 .user-pill.off{background:#f1f2f2;color:#6c777c}
 
+
+.pets-toolbar{display:flex;justify-content:space-between;gap:12px;align-items:end;flex-wrap:wrap;margin:18px 0}
+.pets-search{display:flex;gap:8px;align-items:end;flex:1;min-width:min(100%,280px)}
+.pets-search .field{flex:1;min-width:180px}
+.pets-pagination{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:15px}
+.pet-state{display:inline-flex;border-radius:30px;padding:5px 8px;font-size:10px;font-weight:800;background:#edf4f1;color:#387d70;white-space:nowrap}
+.pet-state.off{background:#f1f2f2;color:#6c777c}
+.pet-state.lost{background:#fff0ef;color:#963d3d}
+.pet-code{font-family:ui-monospace,SFMono-Regular,monospace;font-size:10px;color:#53636b}
+.pet-link{display:inline-block;color:#367f75;font-size:10px;font-weight:800;margin-top:4px}
+
 @media(max-width:1050px){.cards{grid-template-columns:repeat(3,minmax(0,1fr))}.layout{grid-template-columns:215px 1fr}}
 @media(max-width:720px){.layout{display:block}.sidebar{padding:15px 16px;gap:14px}.brand{padding:0 3px}.sidebar .side-label,.sidebar-foot{display:none}.nav{display:flex;overflow-x:auto;padding-bottom:2px}.nav button{white-space:nowrap;padding:9px 11px;font-size:11px}.main{padding:22px 15px 40px}.topbar{align-items:flex-start;flex-direction:column;margin-bottom:20px}.cards{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.kpi{padding:15px;min-height:112px}.kpi-value{font-size:29px}.section-grid{grid-template-columns:1fr}.panel{padding:18px}}
 </style>
@@ -64,7 +75,7 @@ td strong{color:var(--navy)}
       <button class="active" data-view="overview">▦　Resumen</button>
       <button data-view="promotions">◇　Promociones</button>
       <button data-view="users">♙　Usuarios</button>
-      <button disabled title="Pendiente de conectar el backend">♡　Mascotas y QR/NFC</button>
+      <button data-view="pets">♡　Mascotas y QR/NFC</button>
       <button disabled title="Pendiente de conectar el backend">✧　HUËLLIK Plus</button>
       <button disabled title="Pendiente de conectar el backend">▤　Pedidos y envíos</button>
       <button disabled title="Pendiente de conectar el backend">◷　Actividad</button>
@@ -128,6 +139,31 @@ td strong{color:var(--navy)}
       <div class="users-pagination"><span id="usersPageInfo" class="muted">—</span><div class="table-actions"><button class="btn light" id="usersPrev" type="button" disabled>Anterior</button><button class="btn light" id="usersNext" type="button" disabled>Siguiente</button></div></div>
       <p class="footnote">No se muestran teléfonos, direcciones ni datos de pago. No se permite bloquear o borrar cuentas desde esta versión.</p>
     </section>
+
+    <section id="petsView" class="panel hidden">
+      <div class="promo-toolbar"><div><div class="eyebrow">Perfiles e identificación</div><h2 style="font-size:23px;margin:7px 0;color:var(--navy)">Mascotas y QR/NFC</h2><p>Consulta perfiles actuales y etiquetas registradas. Esta primera versión no modifica datos ni identificadores.</p></div><span class="pill">Solo propietario · Solo lectura</span></div>
+      <div id="petsStatus" class="status">Cargando mascotas e identificadores…</div>
+      <div class="cards" style="grid-template-columns:repeat(auto-fit,minmax(135px,1fr));">
+        <article class="kpi"><div class="kpi-label">Mascotas</div><div class="kpi-value" id="petsTotal">—</div></article>
+        <article class="kpi"><div class="kpi-label">Perfiles públicos</div><div class="kpi-value" id="petsPublic">—</div></article>
+        <article class="kpi"><div class="kpi-label">Modo perdido</div><div class="kpi-value" id="petsLost">—</div></article>
+        <article class="kpi"><div class="kpi-label">Etiquetas QR/NFC</div><div class="kpi-value" id="identifiersTotal">—</div></article>
+        <article class="kpi"><div class="kpi-label">Etiquetas activas</div><div class="kpi-value" id="identifiersActive">—</div></article>
+        <article class="kpi"><div class="kpi-label">Escaneos registrados</div><div class="kpi-value" id="scansTotal">—</div></article>
+      </div>
+      <form id="petsSearchForm" class="pets-toolbar">
+        <div class="field pets-search"><div class="field" style="width:100%"><label for="petsQuery">BUSCAR MASCOTA, RAZA, CÓDIGO O PROPIETARIO</label><input id="petsQuery" maxlength="80" placeholder="Ej. Luna, perro o código público"></div></div>
+        <button class="btn" id="petsSearchBtn" type="submit">Buscar</button>
+        <button class="btn light" id="petsClearBtn" type="button">Limpiar</button>
+      </form>
+      <div class="table-wrap"><table style="min-width:900px"><thead><tr><th>MASCOTA / PROPIETARIO</th><th>ESPECIE / RAZA</th><th>PERFIL PÚBLICO</th><th>ESTADO</th><th>CONTACTOS</th><th>ALTA</th></tr></thead><tbody id="petsRows"><tr><td colspan="6">Cargando…</td></tr></tbody></table></div>
+      <div class="pets-pagination"><span id="petsPageInfo" class="muted">—</span><div class="table-actions"><button class="btn light" id="petsPrev" type="button" disabled>Anterior</button><button class="btn light" id="petsNext" type="button" disabled>Siguiente</button></div></div>
+      <div class="panel" style="margin-top:26px">
+        <div class="promo-toolbar"><div><div class="eyebrow">Inventario de etiquetas</div><h2>Identificadores QR/NFC</h2><p>Solo aparecen aquí las etiquetas registradas en el inventario de identificadores, no los enlaces públicos heredados de cada perfil.</p></div><span class="pill" id="identifierCountLabel">0 etiquetas</span></div>
+        <div class="table-wrap"><table style="min-width:850px"><thead><tr><th>MASCOTA</th><th>TIPO</th><th>CÓDIGO</th><th>ESTADO</th><th>ESCANEOS</th><th>ÚLTIMO ESCANEO</th><th>ALTA</th></tr></thead><tbody id="identifierRows"><tr><td colspan="7">Cargando…</td></tr></tbody></table></div>
+      </div>
+      <p class="footnote">Privacidad: no se muestran alertas médicas, teléfonos, correos de contacto ni ubicaciones de escaneo. Los cambios de estado, transferencias y sustituciones se habilitarán más adelante con auditoría.</p>
+    </section>
   </main>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -138,6 +174,7 @@ const client=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY)
 const el=id=>document.getElementById(id);
 let promotions=[];
 let userPage=0,userQuery="",userTotal=0;
+let petsPage=0,petsQuery="",petsTotal=0;
 const USER_PAGE_SIZE=20;
 const scopesLabels={all:"Todos",plus_monthly:"Plus mensual",plus_annual:"Plus anual",tag_metal:"Etiqueta metálica",tag_flex:"Etiqueta flexible"};
 function escapeHtml(value){return String(value??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
@@ -226,10 +263,57 @@ async function loadUsers(){
  }catch(e){usersStatus(e.message,true);el("usersRows").innerHTML='<tr><td colspan="6"><div class="users-empty">No se han podido cargar los usuarios.</div></td></tr>';el("usersPageInfo").textContent="—";el("usersPrev").disabled=true;el("usersNext").disabled=true;}
  finally{el("usersSearchBtn").disabled=false;}
 }
+
+function petsStatus(message,error=false){const node=el("petsStatus");node.textContent=message;node.classList.toggle("error",error)}
+function renderPets(rows){
+ const body=el("petsRows");
+ if(!rows.length){body.innerHTML='<tr><td colspan="6"><div class="users-empty">No se han encontrado mascotas.</div></td></tr>';return}
+ body.innerHTML=rows.map(p=>{
+  const name=escapeHtml(p.name||"Sin nombre"),owner=escapeHtml(p.owner_name||"Sin propietario");
+  const species=escapeHtml(p.species||"—"),breed=escapeHtml(p.breed||"Raza no indicada");
+  const code=String(p.public_id||""),shortCode=escapeHtml(code?code.slice(0,8)+"…":"Sin código");
+  const profile=code?'<span class="pet-code">'+shortCode+'</span><br><a class="pet-link" href="index.html?pet='+encodeURIComponent(code)+'" target="_blank" rel="noopener">Abrir ficha pública</a>':'<span class="user-secondary">Sin enlace</span>';
+  const state=p.is_lost?'<span class="pet-state lost">Modo perdido</span>':p.is_public?'<span class="pet-state">Público</span>':'<span class="pet-state off">Privado</span>';
+  const sex=p.sex?'<div class="user-secondary">'+escapeHtml(p.sex)+'</div>':"";
+  const birth=p.birth_date?'<div class="user-secondary">Nacimiento: '+escapeHtml(p.birth_date)+'</div>':"";
+  return '<tr><td><div class="user-primary">'+name+'</div><div class="user-secondary">Propietario: '+owner+'</div></td><td><strong>'+species+'</strong><div class="user-secondary">'+breed+'</div>'+sex+birth+'</td><td>'+profile+'</td><td>'+state+'</td><td>'+Number(p.contacts_count||0).toLocaleString("es-ES")+'</td><td>'+escapeHtml(localDate(p.created_at))+'</td></tr>';
+ }).join("");
+}
+function renderIdentifiers(rows,total){
+ const body=el("identifierRows");
+ el("identifierCountLabel").textContent=Number(total||0).toLocaleString("es-ES")+" etiquetas";
+ if(!rows.length){body.innerHTML='<tr><td colspan="7"><div class="users-empty">Todavía no hay etiquetas QR/NFC registradas. Los enlaces públicos heredados de los perfiles no se contabilizan como etiquetas físicas.</div></td></tr>';return}
+ const labels={pending:"Pendiente",active:"Activa",disabled:"Desactivada",lost:"Perdida",replaced:"Sustituida"};
+ body.innerHTML=rows.map(i=>{
+  const status=i.status||"",cls=status==="active"?"":status==="lost"?"lost":"off";
+  return '<tr><td><div class="user-primary">'+escapeHtml(i.pet_name||"Mascota")+'</div><div class="user-secondary">'+escapeHtml(i.pet_species||"")+'</div></td><td>'+escapeHtml(String(i.identifier_kind||"").toUpperCase())+'</td><td><span class="pet-code">'+escapeHtml(i.public_code||"—")+'</span></td><td><span class="pet-state '+cls+'">'+escapeHtml(labels[status]||status||"—")+'</span></td><td>'+Number(i.scan_count||0).toLocaleString("es-ES")+'</td><td>'+escapeHtml(i.last_scanned_at?localDate(i.last_scanned_at):"Sin escaneos")+'</td><td>'+escapeHtml(localDate(i.created_at))+'</td></tr>';
+ }).join("");
+}
+async function loadPets(){
+ el("petsSearchBtn").disabled=true;petsStatus("Consultando perfiles e inventario…");
+ try{
+  const {data,error}=await client.functions.invoke("admin-pets",{body:{query:petsQuery,limit:USER_PAGE_SIZE,offset:petsPage*USER_PAGE_SIZE}});
+  if(error){const status=error.context?.status;if(status===401)throw new Error("Tu sesión ha caducado. Vuelve a iniciar sesión.");if(status===403)throw new Error("Tu cuenta no tiene permisos de propietario.");throw new Error(error.message||"No se pudo cargar el módulo.");}
+  if(data?.error)throw new Error(data.error);
+  const result=data?.data,metrics=result?.metrics;
+  if(!result||!Array.isArray(result.pets)||!Array.isArray(result.identifiers)||!metrics)throw new Error("El servidor devolvió una respuesta no válida.");
+  petsTotal=Number(result.pets_total||0);renderPets(result.pets);renderIdentifiers(result.identifiers,result.identifiers_total);
+  for(const [id,key] of [["petsTotal","pets_total"],["petsPublic","pets_public"],["petsLost","pets_lost"],["identifiersTotal","identifiers_total"],["identifiersActive","identifiers_active"],["scansTotal","scans_total"]]){
+   const value=Number(metrics[key]||0);if(!Number.isFinite(value)||value<0)throw new Error("Respuesta de métricas no válida.");el(id).textContent=value.toLocaleString("es-ES");
+  }
+  const first=petsTotal===0?0:petsPage*USER_PAGE_SIZE+1,last=Math.min((petsPage+1)*USER_PAGE_SIZE,petsTotal);
+  el("petsPageInfo").textContent=petsTotal?"Mostrando "+first+"–"+last+" de "+petsTotal+" mascotas":"0 mascotas";
+  el("petsPrev").disabled=petsPage===0;el("petsNext").disabled=(petsPage+1)*USER_PAGE_SIZE>=petsTotal;
+  const separate=result.data_sources?.identifiers_linked_to_current_pets===false;
+  petsStatus(separate?"Perfiles actuales e inventario QR/NFC consultados. Las etiquetas se muestran por separado hasta validar la migración de datos.":"Datos actualizados · Solo lectura.");
+ }catch(e){petsStatus(e.message,true);el("petsRows").innerHTML='<tr><td colspan="6"><div class="users-empty">No se han podido cargar las mascotas.</div></td></tr>';el("identifierRows").innerHTML='<tr><td colspan="7"><div class="users-empty">No se ha podido cargar el inventario.</div></td></tr>';el("petsPageInfo").textContent="—";el("petsPrev").disabled=true;el("petsNext").disabled=true;}
+ finally{el("petsSearchBtn").disabled=false;}
+}
+
 function switchView(view){
- const isPromotions=view==="promotions",isUsers=view==="users";document.querySelector(".topbar h1").textContent=isUsers?"Usuarios registrados":isPromotions?"Códigos promocionales":"Resumen general";el("overviewView").classList.toggle("hidden",isPromotions||isUsers);el("promotionsView").classList.toggle("hidden",!isPromotions);el("usersView").classList.toggle("hidden",!isUsers);
+ const isPromotions=view==="promotions",isUsers=view==="users",isPets=view==="pets";document.querySelector(".topbar h1").textContent=isPets?"Mascotas y QR/NFC":isUsers?"Usuarios registrados":isPromotions?"Códigos promocionales":"Resumen general";el("overviewView").classList.toggle("hidden",isPromotions||isUsers||isPets);el("promotionsView").classList.toggle("hidden",!isPromotions);el("usersView").classList.toggle("hidden",!isUsers);el("petsView").classList.toggle("hidden",!isPets);
  document.querySelectorAll("[data-view]").forEach(b=>b.classList.toggle("active",b.dataset.view===view));
- if(isPromotions)loadPromotions();if(isUsers)loadUsers();
+ if(isPromotions)loadPromotions();if(isUsers)loadUsers();if(isPets)loadPets();
 }
 function showGate(message){el('authGate').classList.remove('hidden');el('app').classList.add('hidden');el('deniedGate').classList.add('hidden');if(message)el('gateMessage').textContent=message}
 function showDenied(){el('deniedGate').classList.remove('hidden');el('authGate').classList.add('hidden');el('app').classList.add('hidden')}
@@ -271,6 +355,10 @@ el("usersSearchForm").addEventListener("submit",event=>{event.preventDefault();u
 el("usersClearBtn").addEventListener("click",()=>{el("usersQuery").value="";userQuery="";userPage=0;loadUsers()});
 el("usersPrev").addEventListener("click",()=>{if(userPage>0){userPage--;loadUsers()}});
 el("usersNext").addEventListener("click",()=>{if((userPage+1)*USER_PAGE_SIZE<userTotal){userPage++;loadUsers()}});
+el("petsSearchForm").addEventListener("submit",event=>{event.preventDefault();petsQuery=el("petsQuery").value.trim();petsPage=0;loadPets()});
+el("petsClearBtn").addEventListener("click",()=>{el("petsQuery").value="";petsQuery="";petsPage=0;loadPets()});
+el("petsPrev").addEventListener("click",()=>{if(petsPage>0){petsPage--;loadPets()}});
+el("petsNext").addEventListener("click",()=>{if((petsPage+1)*USER_PAGE_SIZE<petsTotal){petsPage++;loadPets()}});
 resetPromoForm();
 el('recheckBtn').addEventListener('click',loadOverview);
 el('logoutBtn').addEventListener('click',async()=>{await client.auth.signOut();showGate('Has cerrado sesión. Puedes volver a Mi cuenta para acceder a HUËLLIK.')});
