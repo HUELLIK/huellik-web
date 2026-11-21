@@ -17,10 +17,15 @@ declare
   v_medical_alerts text := null;
   v_show_medical boolean := false;
   v_legacy_row_exists boolean := false;
+  v_identifier_row_exists boolean := false;
 begin
   if v_code is null or char_length(v_code) > 200 then
     return jsonb_build_object('error','not_found');
   end if;
+
+  select exists(
+    select 1 from petlink.identifiers i where i.public_code = v_code
+  ) into v_identifier_row_exists;
 
   select p.* into v_pet
   from petlink.identifiers i
@@ -30,6 +35,10 @@ begin
     and p.is_public = true
   order by i.created_at desc
   limit 1;
+
+  if v_identifier_row_exists and v_pet.id is null then
+    return jsonb_build_object('error','not_found');
+  end if;
 
   if v_pet.id is null then
     begin
