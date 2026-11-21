@@ -1,5 +1,6 @@
 -- HUËLLIK admin promotions RPC v1
--- DRAFT ONLY. Do not execute until reviewed together with the promo tables migration.
+-- APPLIED to the existing HUËLLIK Supabase project on 2026-11-21.
+-- Snapshot for traceability; do not re-run as a separate migration.
 -- Uses the caller JWT; no service_role and no direct petlink schema exposure.
 
 create or replace function public.huellik_admin_promotions_v1(
