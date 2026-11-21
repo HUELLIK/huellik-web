@@ -141,8 +141,17 @@ begin
     ) returning id into v_id;
   else
     if exists (select 1 from petlink.promo_redemptions where promo_code_id = v_id) then
-      if exists (select 1 from petlink.promo_codes where id = v_id and code <> v_code) then
-        raise check_violation using message = 'Code cannot change after a redemption exists';
+      if exists (
+        select 1 from petlink.promo_codes p
+        where p.id = v_id and (
+          p.code <> v_code
+          or p.discount_type <> v_type
+          or p.discount_value <> v_value
+          or p.currency <> v_currency
+          or p.applies_to <> v_scopes
+        )
+      ) then
+        raise check_violation using message = 'Discount terms cannot change after a redemption exists';
       end if;
     end if;
     update petlink.promo_codes set
