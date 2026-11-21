@@ -108,6 +108,16 @@ grant select, insert, update, delete on table petlink.admin_users, petlink.promo
 
 commit;
 
+-- API SCHEMA NOTE:
+-- The audited project currently has no USAGE grant on schema petlink for service_role,
+-- anon or authenticated. This draft grants USAGE only to service_role. If Edge Functions
+-- use the Supabase Data API/PostgREST to access petlink tables directly, the petlink schema
+-- must also be added to the project's exposed Data API schemas. Exposing a schema does not
+-- itself grant table access: keep all table grants revoked from anon/authenticated and grant
+-- only service_role. If you do not want petlink exposed through PostgREST at all, implement
+-- narrowly scoped public RPC wrappers with EXECUTE granted only to service_role instead.
+-- Verify the actual Data API schema configuration before selecting either approach.
+
 -- IMPORTANT IMPLEMENTATION NOTES:
 -- 1. Do not seed admin_users until the owner account UUID has been confirmed.
 -- 2. Edge Functions must validate the caller's JWT with Supabase Auth, then check admin_users
