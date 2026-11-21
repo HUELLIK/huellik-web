@@ -1,7 +1,7 @@
 # HUËLLIK v2 — plan de desarrollo sin costes adicionales
 
 ## Regla de coste
-No crear ramas/proyectos de Supabase, no activar servicios de pago, no comprar dominios ni contratar herramientas. Trabajar en la rama GitHub gratuita `develop/huellik-v2`. Las consultas de auditoría a producción serán de solo lectura. Las migraciones y Edge Functions se preparan como archivos en GitHub, pero NO se ejecutan ni despliegan a producción.
+No crear ramas/proyectos de Supabase, no activar servicios de pago, no comprar dominios ni contratar herramientas. Trabajar en la rama GitHub gratuita `develop/huellik-v2`. Las consultas de auditoría a producción serán de solo lectura. Las migraciones y Edge Functions se desarrollan primero en `develop/huellik-v2`; los cambios de backend autorizados se aplican al proyecto Supabase actual. `main` y la web publicada permanecen intactas.
 
 ## Decisiones confirmadas
 - `petlink` es el nombre histórico de HUËLLIK.
@@ -20,7 +20,7 @@ Supabase proyecto Huëllik Project, región eu-west-1, PostgreSQL 17.
 - Dos usuarios coinciden entre auth.users, public.profiles y petlink.app_users.
 - Hay una mascota y un contacto en public; las tablas de negocio petlink están vacías.
 - RLS está habilitado en ambas estructuras. petlink carece de políticas y de privilegio USAGE para anon/authenticated; no abrirlo directamente.
-- No hay migraciones de producto ni Edge Functions desplegadas.
+- Funciones Edge desplegadas: `admin-overview`, `admin-promotions` y `validate-promo`, todas con JWT obligatorio (excepto futuros webhooks firmados).
 - No hay buckets de Storage.
 - La vista pública de petlink no tiene permisos de lectura para anon/authenticated.
 - La RPC pública de perfil es SECURITY DEFINER y actualmente ejecutable por anon/authenticated. Debe limitarse y probarse.
@@ -40,8 +40,8 @@ Supabase proyecto Huëllik Project, región eu-west-1, PostgreSQL 17.
 ## Reglas
 - Nunca guardar service_role ni claves Stripe secret en frontend o Git.
 - No usar user_metadata para autorización.
-- No aplicar DDL en Supabase de producción durante esta fase.
-- No desplegar funciones Edge ni cambiar ajustes de Auth sin revisión.
+- No aplicar DDL adicional ni desplegar nuevas funciones sin revisar el alcance y contar con autorización.
+- No cambiar ajustes de Auth sin revisión.
 - No eliminar/renombrar tablas ni copiar datos sin backup y prueba de reversión.
 - Ningún pago se activa sin configurar Stripe y probar webhooks firmados e idempotentes.
 - La promoción se valida en backend, no en JavaScript del navegador.
