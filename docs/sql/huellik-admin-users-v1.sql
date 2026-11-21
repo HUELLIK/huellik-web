@@ -50,8 +50,8 @@ begin
         u.email_verified_at is not null as email_verified,
         u.created_at,
         (select count(*)::integer
-           from petlink.pet_members pm
-          where pm.user_id = u.id) as pet_count,
+           from public.pets p
+          where p.owner_id = u.id) as pet_count,
         (select count(*)::integer
            from petlink.orders o
           where o.buyer_user_id = u.id) as order_count,
