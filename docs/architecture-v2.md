@@ -20,7 +20,7 @@ Supabase proyecto Huëllik Project, región eu-west-1, PostgreSQL 17.
 - Dos usuarios coinciden entre auth.users, public.profiles y petlink.app_users.
 - Hay una mascota y un contacto en public; las tablas de negocio petlink están vacías.
 - RLS está habilitado en ambas estructuras. petlink carece de políticas y de privilegio USAGE para anon/authenticated; no abrirlo directamente.
-- Funciones Edge desplegadas: `admin-overview`, `admin-promotions` y `validate-promo`, todas con JWT obligatorio (excepto futuros webhooks firmados).
+- Funciones Edge desplegadas: `admin-overview`, `admin-promotions`, `validate-promo` y `admin-users`, todas con JWT obligatorio (excepto futuros webhooks firmados).
 - No hay buckets de Storage.
 - La vista pública de petlink no tiene permisos de lectura para anon/authenticated.
 - La RPC pública de perfil es SECURITY DEFINER y actualmente ejecutable por anon/authenticated. Debe limitarse y probarse.
