@@ -38,7 +38,10 @@ Estado actualizado: 21-11-2026. Rama de trabajo: `develop/huellik-v2`.
   - [x] Probar CRUD de forma transaccional (la prueba se revirtió, no dejó códigos de prueba).
   - [x] Probar rechazo de usuario no propietario en la RPC.
   - [ ] Probar desde la sesión real del propietario en la preview de Vercel.
-  - [ ] Implementar validación y reserva transaccional del cupón durante checkout.
+  - [x] Implementar endpoint autenticado de validación de elegibilidad en servidor.
+  - [x] Comprobar vigencia, estado, alcance, primer cliente y límites actuales.
+  - [x] Ignorar reservas antiguas (ventana de 30 minutos) en validación y métricas.
+  - [ ] Implementar reserva atómica durante create-checkout con precio autoritativo.
 - [ ] Módulo usuarios: búsqueda mínima y estado.
 - [ ] Módulo mascotas/QR/NFC: consulta y ciclo de vida auditado.
 - [ ] Módulo Plus: derechos, origen, periodo, concesión/revocación con motivo.
@@ -86,7 +89,7 @@ Estado actualizado: 21-11-2026. Rama de trabajo: `develop/huellik-v2`.
 - [ ] Descuento fijo o porcentual configurable.
 - [ ] Alcance Plus mensual/anual y productos elegibles.
 - [ ] Inicio/caducidad, límite global y por usuario, primer cliente opcional.
-- [ ] Reserva transaccional y protección contra usos concurrentes.
+- [ ] Reserva transaccional y protección contra usos concurrentes (pendiente de catálogo/precios definitivos y checkout).
 - [ ] Integrar Stripe solo cuando el propietario decida configurar cuenta y secretos.
 - [ ] Checkout, webhooks firmados e idempotentes, reembolsos y cancelaciones.
 - [ ] Activar Plus solo tras pago confirmado o concesión autorizada.
