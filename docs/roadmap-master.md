@@ -99,7 +99,7 @@ Estado actualizado: 21-11-2026. Rama de trabajo: `develop/huellik-v2`.
 - [ ] Revisión del propietario y aprobación explícita antes de publicar/merge a `main`.
 
 ## Implementación actual
-- `admin.html`: primera interfaz de administración de solo lectura; el resto de secciones se mantienen visibles como módulos planificados y desactivados hasta tener backend seguro.
+- `admin.html`: resumen de solo lectura y formulario/tabla de promociones preparados; las operaciones de promociones esperan el despliegue del backend seguro.
 - `index.html`: muestra el acceso a Administración solo cuando la función de servidor autoriza la cuenta.
 - `supabase/functions/admin-overview`: endpoint activo, JWT obligatorio.
 - `public.pets` sigue siendo la fuente actual del recuento de mascotas; no se ha migrado información a `petlink.pets`.
