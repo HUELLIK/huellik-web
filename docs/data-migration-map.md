@@ -47,6 +47,8 @@ Copiar cada contacto conservando UUID, orden y visibilidad. La tabla nueva debe 
 
 - Los public_id actuales son identificadores de ruta de perfil heredados, no inventario físico de etiquetas.
 - Se conservan en petlink.pets.legacy_public_id para resolver los enlaces antiguos ?pet=<public_id>.
+- La nueva RPC public.resolve_public_pet_profile(p_code) admite códigos físicos mediante ?tag=<public_code>, UUID heredados y compatibilidad temporal con la ficha antigua.
+- Solo se resuelven etiquetas activas; etiquetas desactivadas/perdidas/reemplazadas y perfiles privados devuelven not_found.
 - No crear identificadores QR/NFC a partir de public_id. Las etiquetas físicas deben tener códigos aleatorios propios y filas reales en petlink.identifiers.
 - La URL heredada debe seguir resolviendo el perfil correcto hasta que la nueva función pública y el frontend estén probados.
 - No reasignar identificadores automáticamente. Sustitución, pérdida y transferencia deben generar evento de auditoría.
