@@ -49,6 +49,12 @@ td strong{color:var(--navy)}
 .pet-state.lost{background:#fff0ef;color:#963d3d}
 .pet-code{font-family:ui-monospace,SFMono-Regular,monospace;font-size:10px;color:#53636b}
 .pet-link{display:inline-block;color:#367f75;font-size:10px;font-weight:800;margin-top:4px}
+.identifier-actions{display:flex;gap:5px;flex-wrap:wrap;min-width:150px}
+.identifier-actions button{border:1px solid var(--line);border-radius:8px;background:#fff;padding:6px 8px;font-size:10px;font-weight:800;color:var(--navy);cursor:pointer}
+.identifier-actions button:hover{border-color:var(--teal);color:var(--teal)}
+.identifier-actions select{max-width:145px;padding:6px;border:1px solid var(--line);border-radius:8px;font-size:10px;background:#fff}
+.audit-reason{max-width:250px;white-space:normal;font-size:11px;color:var(--muted)}
+
 
 @media(max-width:1050px){.cards{grid-template-columns:repeat(3,minmax(0,1fr))}.layout{grid-template-columns:215px 1fr}}
 @media(max-width:720px){.layout{display:block}.sidebar{padding:15px 16px;gap:14px}.brand{padding:0 3px}.sidebar .side-label,.sidebar-foot{display:none}.nav{display:flex;overflow-x:auto;padding-bottom:2px}.nav button{white-space:nowrap;padding:9px 11px;font-size:11px}.main{padding:22px 15px 40px}.topbar{align-items:flex-start;flex-direction:column;margin-bottom:20px}.cards{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.kpi{padding:15px;min-height:112px}.kpi-value{font-size:29px}.section-grid{grid-template-columns:1fr}.panel{padding:18px}}
@@ -160,8 +166,13 @@ td strong{color:var(--navy)}
       <div class="pets-pagination"><span id="petsPageInfo" class="muted">—</span><div class="table-actions"><button class="btn light" id="petsPrev" type="button" disabled>Anterior</button><button class="btn light" id="petsNext" type="button" disabled>Siguiente</button></div></div>
       <div class="panel" style="margin-top:26px">
         <div class="promo-toolbar"><div><div class="eyebrow">Inventario de etiquetas</div><h2>Identificadores QR/NFC</h2><p>Solo aparecen aquí las etiquetas registradas en el inventario de identificadores, no los enlaces públicos heredados de cada perfil.</p></div><span class="pill" id="identifierCountLabel">0 etiquetas</span></div>
-        <div class="table-wrap"><table style="min-width:850px"><thead><tr><th>MASCOTA</th><th>TIPO</th><th>CÓDIGO</th><th>ESTADO</th><th>ESCANEOS</th><th>ÚLTIMO ESCANEO</th><th>ALTA</th></tr></thead><tbody id="identifierRows"><tr><td colspan="7">Cargando…</td></tr></tbody></table></div>
+        <div class="table-wrap"><table style="min-width:850px"><thead><tr><th>MASCOTA</th><th>TIPO</th><th>CÓDIGO</th><th>ESTADO</th><th>ESCANEOS</th><th>ÚLTIMO ESCANEO</th><th>ALTA</th><th>GESTIÓN</th></tr></thead><tbody id="identifierRows"><tr><td colspan="8">Cargando…</td></tr></tbody></table></div>
       </div>
+
+        <div class="panel" style="margin-top:22px">
+          <div class="promo-toolbar"><div><div class="eyebrow">Trazabilidad</div><h2>Historial de QR/NFC</h2><p>Registro de activaciones, pérdidas, recuperaciones, desactivaciones y sustituciones.</p></div><span class="pill">Auditoría</span></div>
+          <div class="table-wrap"><table style="min-width:780px"><thead><tr><th>FECHA</th><th>ACCIÓN</th><th>ETIQUETA</th><th>ADMINISTRADOR</th><th>MOTIVO</th></tr></thead><tbody id="identifierAuditRows"><tr><td colspan="5">Cargando historial…</td></tr></tbody></table></div>
+        </div>
       <p class="footnote">Privacidad: no se muestran alertas médicas, teléfonos, correos de contacto ni ubicaciones de escaneo. Los cambios de estado, transferencias y sustituciones se habilitarán más adelante con auditoría.</p>
     </section>
   </main>
@@ -282,12 +293,58 @@ function renderPets(rows){
 function renderIdentifiers(rows,total){
  const body=el("identifierRows");
  el("identifierCountLabel").textContent=Number(total||0).toLocaleString("es-ES")+" etiquetas";
- if(!rows.length){body.innerHTML='<tr><td colspan="7"><div class="users-empty">Todavía no hay etiquetas QR/NFC registradas. Los enlaces públicos heredados de los perfiles no se contabilizan como etiquetas físicas.</div></td></tr>';return}
+ if(!rows.length){body.innerHTML='<tr><td colspan="8"><div class="users-empty">Todavía no hay etiquetas QR/NFC registradas. Los enlaces públicos heredados de los perfiles no se contabilizan como etiquetas físicas.</div></td></tr>';return}
  const labels={pending:"Pendiente",active:"Activa",disabled:"Desactivada",lost:"Perdida",replaced:"Sustituida"};
  body.innerHTML=rows.map(i=>{
   const status=i.status||"",cls=status==="active"?"":status==="lost"?"lost":"off";
-  return '<tr><td><div class="user-primary">'+escapeHtml(i.pet_name||"Mascota")+'</div><div class="user-secondary">'+escapeHtml(i.pet_species||"")+'</div></td><td>'+escapeHtml(String(i.identifier_kind||"").toUpperCase())+'</td><td><span class="pet-code">'+escapeHtml(i.public_code||"—")+'</span></td><td><span class="pet-state '+cls+'">'+escapeHtml(labels[status]||status||"—")+'</span></td><td>'+Number(i.scan_count||0).toLocaleString("es-ES")+'</td><td>'+escapeHtml(i.last_scanned_at?localDate(i.last_scanned_at):"Sin escaneos")+'</td><td>'+escapeHtml(localDate(i.created_at))+'</td></tr>';
+  const candidates=rows.filter(x=>x.pet_id===i.pet_id&&x.id!==i.id&&x.status==="pending");
+  let actions="";
+  if(status==="pending")actions='<button type="button" data-id-action="activate" data-id="'+escapeHtml(i.id)+'">Activar</button><button type="button" data-id-action="disable" data-id="'+escapeHtml(i.id)+'">Desactivar</button>';
+  if(status==="active")actions='<button type="button" data-id-action="mark_lost" data-id="'+escapeHtml(i.id)+'">Marcar perdida</button><button type="button" data-id-action="disable" data-id="'+escapeHtml(i.id)+'">Desactivar</button>';
+  if(status==="lost")actions='<button type="button" data-id-action="mark_found" data-id="'+escapeHtml(i.id)+'">Marcar encontrada</button><button type="button" data-id-action="disable" data-id="'+escapeHtml(i.id)+'">Desactivar</button>';
+  if(["active","lost"].includes(status)&&candidates.length){
+   actions+='<select data-replacement-for="'+escapeHtml(i.id)+'"><option value="">Sustituir por…</option>'+candidates.map(x=>'<option value="'+escapeHtml(x.id)+'">'+escapeHtml(x.public_code)+' · QR/NFC</option>').join("")+'</select><button type="button" data-id-action="replace" data-id="'+escapeHtml(i.id)+'">Sustituir</button>';
+  }
+  return '<tr><td><div class="user-primary">'+escapeHtml(i.pet_name||"Mascota")+'</div><div class="user-secondary">'+escapeHtml(i.pet_species||"")+'</div></td><td>'+escapeHtml(String(i.identifier_kind||"").toUpperCase())+'</td><td><span class="pet-code">'+escapeHtml(i.public_code||"—")+'</span></td><td><span class="pet-state '+cls+'">'+escapeHtml(labels[status]||status||"—")+'</span></td><td>'+Number(i.scan_count||0).toLocaleString("es-ES")+'</td><td>'+escapeHtml(i.last_scanned_at?localDate(i.last_scanned_at):"Sin escaneos")+'</td><td>'+escapeHtml(localDate(i.created_at))+'</td><td><div class="identifier-actions">'+(actions||'<span class="user-secondary">Sin acciones</span>')+'</div></td></tr>';
  }).join("");
+ body.querySelectorAll("[data-id-action]").forEach(button=>button.addEventListener("click",()=>runIdentifierAction(button.dataset.idAction,button.dataset.id,body)));
+}
+function renderIdentifierAudit(events){
+ const body=el("identifierAuditRows");
+ if(!Array.isArray(events)||!events.length){body.innerHTML='<tr><td colspan="5"><div class="users-empty">Todavía no hay movimientos de etiquetas registrados.</div></td></tr>';return}
+ const labels={identifier_activated:"Activación",identifier_marked_lost:"Marcada como perdida",identifier_marked_found:"Recuperada",identifier_disabled:"Desactivación",identifier_replaced:"Sustitución"};
+ body.innerHTML=events.map(e=>{
+  const data=e.event_data||{},ids=e.event_type==="identifier_replaced"?(String(data.old_identifier_id||"").slice(0,8)+" → "+String(data.new_identifier_id||"").slice(0,8)):String(data.identifier_id||"").slice(0,8);
+  return '<tr><td>'+escapeHtml(localDate(e.created_at))+'</td><td><strong>'+escapeHtml(labels[e.event_type]||e.event_type)+'</strong></td><td><span class="pet-code">'+escapeHtml(ids||"—")+'</span></td><td>'+escapeHtml(e.actor_name||"Administrador")+'</td><td><div class="audit-reason">'+escapeHtml(data.reason||"—")+'</div></td></tr>';
+ }).join("");
+}
+async function loadIdentifierAudit(){
+ const {data,error}=await client.functions.invoke("admin-identifiers",{body:{action:"audit",limit:30,offset:0}});
+ if(error)throw new Error(error.message||"No se pudo cargar el historial de etiquetas.");
+ if(data?.error)throw new Error(data.error);
+ const result=data?.data;
+ if(!result||!Array.isArray(result.events))throw new Error("Respuesta de auditoría no válida.");
+ renderIdentifierAudit(result.events);
+}
+async function runIdentifierAction(action,identifierId,container){
+ const row=container.querySelector('[data-id="'+identifierId+'"]')?.closest("tr");
+ let replacementId=null;
+ if(action==="replace"){
+  replacementId=row?.querySelector('[data-replacement-for="'+identifierId+'"]')?.value||null;
+  if(!replacementId){petsStatus("Selecciona primero una etiqueta pendiente de la misma mascota.",true);return;}
+ }
+ const labels={activate:"activar esta etiqueta",mark_lost:"marcar esta etiqueta como perdida",mark_found:"marcar esta etiqueta como recuperada",disable:"desactivar esta etiqueta",replace:"sustituir esta etiqueta por la nueva"};
+ if(!window.confirm("Vas a "+labels[action]+". Esta operación quedará registrada en el historial. ¿Quieres continuar?"))return;
+ const reason=window.prompt("Indica el motivo (mínimo 8 caracteres).");
+ if(reason===null)return;
+ if(reason.trim().length<8||reason.trim().length>300){petsStatus("El motivo debe tener entre 8 y 300 caracteres.",true);return;}
+ try{
+  const {data,error}=await client.functions.invoke("admin-identifiers",{body:{action,identifier_id:identifierId,replacement_identifier_id:replacementId,reason:reason.trim()}});
+  if(error){const status=error.context?.status;if(status===401)throw new Error("Tu sesión ha caducado.");if(status===403)throw new Error("Tu cuenta no tiene permisos de propietario.");throw new Error(error.message||"No se pudo actualizar la etiqueta.");}
+  if(data?.error)throw new Error(data.error);
+  petsStatus("Cambio guardado y registrado en el historial.");
+  await loadPets();
+ }catch(e){petsStatus(e.message,true);}
 }
 async function loadPets(){
  el("petsSearchBtn").disabled=true;petsStatus("Consultando perfiles e inventario…");
@@ -304,8 +361,9 @@ async function loadPets(){
   const first=petsTotal===0?0:petsPage*USER_PAGE_SIZE+1,last=Math.min((petsPage+1)*USER_PAGE_SIZE,petsTotal);
   el("petsPageInfo").textContent=petsTotal?"Mostrando "+first+"–"+last+" de "+petsTotal+" mascotas":"0 mascotas";
   el("petsPrev").disabled=petsPage===0;el("petsNext").disabled=(petsPage+1)*USER_PAGE_SIZE>=petsTotal;
+  await loadIdentifierAudit();
   const separate=result.data_sources?.identifiers_linked_to_current_pets===false;
-  petsStatus(separate?"Perfiles actuales e inventario QR/NFC consultados. Las etiquetas se muestran por separado hasta validar la migración de datos.":"Datos actualizados · Solo lectura.");
+  petsStatus(separate?"Perfiles actuales e inventario QR/NFC consultados. Las etiquetas se muestran por separado hasta validar la migración de datos.":"Datos actualizados.");
  }catch(e){petsStatus(e.message,true);el("petsRows").innerHTML='<tr><td colspan="6"><div class="users-empty">No se han podido cargar las mascotas.</div></td></tr>';el("identifierRows").innerHTML='<tr><td colspan="7"><div class="users-empty">No se ha podido cargar el inventario.</div></td></tr>';el("petsPageInfo").textContent="—";el("petsPrev").disabled=true;el("petsNext").disabled=true;}
  finally{el("petsSearchBtn").disabled=false;}
 }
