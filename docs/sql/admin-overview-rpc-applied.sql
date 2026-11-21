@@ -26,7 +26,8 @@ begin
 
   return pg_catalog.jsonb_build_object(
     'users', (select count(*)::integer from petlink.app_users),
-    'pets', (select count(*)::integer from petlink.pets),
+    -- Current production pet records still live in public.pets.
+    'pets', (select count(*)::integer from public.pets),
     'identifiers', (select count(*)::integer from petlink.identifiers),
     'orders', (select count(*)::integer from petlink.orders),
     'subscriptions', (select count(*)::integer from petlink.subscriptions)
