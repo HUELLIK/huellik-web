@@ -45,6 +45,7 @@ También se comparó el resultado del enlace antiguo con la RPC anterior: el JSO
 
 - Función SQL desplegada en el proyecto Supabase.
 - Frontend actualizado únicamente en develop/huellik-v2.
+- Preview Vercel desplegada correctamente: https://huellik-web-git-develop-huellik-v2-huellik-web.vercel.app
 - main y la web publicada no se han modificado.
 - No hay mascotas migradas ni etiquetas físicas registradas todavía.
 - No se han creado servicios ni costes nuevos.
