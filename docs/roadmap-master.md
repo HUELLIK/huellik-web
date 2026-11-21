@@ -32,6 +32,10 @@ Estado actualizado: 21-11-2026. Rama de trabajo: `develop/huellik-v2`.
 - [x] Mostrar cuentas, mascotas, identificadores, pedidos y suscripciones.
 - [ ] Conectar y probar el acceso desde la cuenta propietaria en la web de preview.
 - [ ] Módulo promociones: crear, editar, activar/desactivar, métricas y límites.
+  - [x] Definir contrato CRUD y validaciones de servidor.
+  - [x] Preparar Edge Function y RPC SQL como borradores revisables.
+  - [ ] Aplicar SQL y desplegar función tras autorización expresa y revisión.
+  - [ ] Conectar la interfaz y probar con propietario/usuario normal.
 - [ ] Módulo usuarios: búsqueda mínima y estado.
 - [ ] Módulo mascotas/QR/NFC: consulta y ciclo de vida auditado.
 - [ ] Módulo Plus: derechos, origen, periodo, concesión/revocación con motivo.
