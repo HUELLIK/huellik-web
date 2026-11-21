@@ -29,7 +29,8 @@ Deno.serve(async(req:Request)=>{
   const client=createClient(url,publishable,{global:{headers:{Authorization:authorization}},auth:{autoRefreshToken:false,persistSession:false,detectSessionInUrl:false}});
   const {data:userData,error:userError}=await client.auth.getUser(token);
   if(userError||!userData.user)return reply({error:"Invalid or expired session"},401,origin);
-  let data: unknown;\n  let error: { code?: string; message: string } | null = null;
+  let data: unknown;
+  let error: { code?: string; message: string } | null = null;
   if(action==="audit"){
     const id=input.identifier_id===undefined||input.identifier_id===null?null:input.identifier_id;
     const limit=input.limit===undefined?50:input.limit,offset=input.offset===undefined?0:input.offset;
