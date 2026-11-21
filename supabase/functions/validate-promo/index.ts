@@ -48,7 +48,7 @@ Deno.serve(async (req: Request) => {
   if (req.method !== "POST") return response({ error: "Method not allowed" }, 405, origin);
 
   const authorization = req.headers.get("authorization") ?? "";
-  const token = authorization.match(/^Bearer\\s+(.+)$/i)?.[1];
+  const token = authorization.match(/^Bearer\s+(.+)$/i)?.[1];
   if (!token) return response({ error: "Authentication required" }, 401, origin);
 
   let body: unknown;
