@@ -1,6 +1,6 @@
 # admin-promotions — gestión de códigos HUËLLIK
 
-Estado: código preparado en `develop/huellik-v2`; no desplegado ni aplicado a Supabase.
+Estado: desplegado y activo en Supabase con `verify_jwt = true`.
 
 ## Funciones previstas
 - Listar códigos y contadores de reservas/canjes.
