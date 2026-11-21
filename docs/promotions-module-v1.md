@@ -1,6 +1,6 @@
 # HUËLLIK — módulo de promociones v1
 
-Estado: interfaz y backend preparados en la rama de desarrollo; backend todavía no desplegado.
+Estado: tablas y RPC aplicadas en Supabase; Edge Function `admin-promotions` desplegada (JWT obligatorio); interfaz conectada en `develop/huellik-v2`.
 
 ## Experiencia en el panel
 - Formulario de creación y edición.
@@ -32,4 +32,12 @@ El mes gratis no se aplica al anual. Los descuentos iniciales no implican descue
 - `supabase/functions/admin-promotions/index.ts`: borrador de Edge Function.
 - `docs/sql/admin-promotions-rpc-draft.sql`: borrador de RPC.
 - `docs/sql/huellik-v2-commerce-draft.sql`: borrador de tablas, no aplicado.
-- No se ha ejecutado SQL, desplegado la función, activado Stripe ni modificado `main`.
+- Se aplicaron dos migraciones en el proyecto existente y se desplegó únicamente `admin-promotions`. No se activó Stripe ni se modificó `main`.
+
+
+## Pruebas realizadas
+- CRUD de prueba como propietario: crear, listar, editar y desactivar dentro de una transacción revertida; no quedó ningún cupón de prueba.
+- Usuario autenticado no propietario: la RPC rechazó el acceso.
+- RLS activo en ambas tablas; ni `anon` ni `authenticated` pueden leerlas directamente.
+- La RPC no es ejecutable por `anon`; solo por `authenticated`, y vuelve a verificar rol `owner`.
+- Pendiente: prueba desde el navegador con la sesión real del propietario en la URL preview.
