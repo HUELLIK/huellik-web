@@ -47,7 +47,14 @@ Estado actualizado: 21-11-2026. Rama de trabajo: `develop/huellik-v2`.
   - [x] Limitar datos personales visibles; no mostrar teléfonos, direcciones ni datos de pago.
   - [x] Proteger con RPC owner-only y Edge Function con JWT.
   - [ ] Probar desde la sesión real del propietario en la preview.
-- [ ] Módulo mascotas/QR/NFC: consulta y ciclo de vida auditado.
+- [x] Módulo mascotas/QR/NFC v1: consulta de perfiles actuales e inventario de identificadores en modo solo lectura.
+  - [x] Buscar y paginar perfiles actuales desde public.pets.
+  - [x] Mostrar visibilidad, modo perdido, propietario y recuento de contactos sin exponer datos privados.
+  - [x] Consultar identificadores QR/NFC y métricas agregadas de escaneos desde petlink.
+  - [x] Proteger con RPC owner-only y Edge Function con JWT; sin acceso directo a petlink.
+  - [ ] Probar desde la sesión real del propietario en la preview.
+  - [ ] Diseñar y validar migración de mascotas/contactos preservando UUID y enlaces heredados.
+  - [ ] Implementar acciones QR/NFC (activación, pérdida, sustitución y transferencia) con auditoría.
 - [ ] Módulo Plus: derechos, origen, periodo, concesión/revocación con motivo.
 - [ ] Módulo pedidos y envíos.
 - [ ] Registro de actividad administrativa.
@@ -114,4 +121,5 @@ Estado actualizado: 21-11-2026. Rama de trabajo: `develop/huellik-v2`.
 - `supabase/functions/admin-overview`: endpoint activo, JWT obligatorio.
 - `supabase/functions/admin-promotions`: endpoint activo, JWT obligatorio; tablas privadas y RPC aplicadas.
 - `supabase/functions/admin-users`: endpoint activo, JWT obligatorio; directorio owner-only de solo lectura.
-- `public.pets` sigue siendo la fuente actual del recuento de mascotas; no se ha migrado información a `petlink.pets`.
+- `supabase/functions/admin-pets`: endpoint activo, JWT obligatorio; perfiles actuales e inventario QR/NFC owner-only de solo lectura.
+- `public.pets` sigue siendo la fuente actual de mascotas. `petlink.pets`, `petlink.identifiers` y `petlink.scans` están vacías; los enlaces públicos heredados no se presentan como etiquetas físicas. No se ha migrado información.
