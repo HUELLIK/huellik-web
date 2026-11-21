@@ -32,3 +32,17 @@ Al construir v1 hay una mascota en public.pets, pero petlink.pets, petlink.ident
 - Pruebas de acceso con usuario normal y visitante anónimo.
 - Diseñar migración transaccional de mascotas y contactos a petlink preservando UUID y enlaces heredados.
 - Diseñar acciones de ciclo de vida de identificadores con auditoría e idempotencia antes de habilitar escrituras.
+
+
+## Verificación técnica
+- Migración SQL aplicada: huellik_admin_pets_v1.
+- RPC probada con identidad owner: devuelve arrays de mascotas e identificadores y métricas consistentes.
+- Prueba de autorización: una cuenta autenticada que no es owner es rechazada.
+- Permisos: anon no tiene EXECUTE; authenticated puede invocar la RPC, que vuelve a validar owner dentro del cuerpo.
+- Respuesta comprobada sin campos medical_alerts ni datos de teléfono/contacto.
+- Edge Function admin-pets desplegada y ACTIVE con verify_jwt=true.
+- Script JavaScript de admin.html validado sintácticamente.
+- La invocación HTTP desde una sesión real del propietario en el navegador sigue pendiente.
+
+## Nota del asesor de seguridad
+Supabase Advisor señala que la RPC SECURITY DEFINER es invocable por authenticated. Es una concesión intencionada para que el Edge Function pueda llamarla con el JWT del propietario: el cuerpo vuelve a comprobar auth.uid() contra petlink.admin_users y rechaza cuentas normales; EXECUTE está revocado a PUBLIC y anon. La prueba de usuario no propietario ha pasado. Se debe mantener este control y revisar el diseño si se mueve la RPC fuera del esquema API en una futura iteración.
