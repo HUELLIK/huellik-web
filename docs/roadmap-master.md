@@ -31,11 +31,14 @@ Estado actualizado: 21-11-2026. Rama de trabajo: `develop/huellik-v2`.
 - [x] Construir primera pantalla de resumen de solo lectura.
 - [x] Mostrar cuentas, mascotas, identificadores, pedidos y suscripciones.
 - [ ] Conectar y probar el acceso desde la cuenta propietaria en la web de preview.
-- [ ] Módulo promociones: crear, editar, activar/desactivar, métricas y límites.
+- [x] Módulo promociones: interfaz de creación/edición/listado y desactivación.
   - [x] Definir contrato CRUD y validaciones de servidor.
-  - [x] Preparar Edge Function y RPC SQL como borradores revisables.
-  - [ ] Aplicar SQL y desplegar función tras autorización expresa y revisión.
-  - [ ] Conectar la interfaz y probar con propietario/usuario normal.
+  - [x] Aplicar tablas privadas y RPC de administración en Supabase.
+  - [x] Desplegar Edge Function `admin-promotions` con JWT obligatorio.
+  - [x] Probar CRUD de forma transaccional (la prueba se revirtió, no dejó códigos de prueba).
+  - [x] Probar rechazo de usuario no propietario en la RPC.
+  - [ ] Probar desde la sesión real del propietario en la preview de Vercel.
+  - [ ] Implementar validación y reserva transaccional del cupón durante checkout.
 - [ ] Módulo usuarios: búsqueda mínima y estado.
 - [ ] Módulo mascotas/QR/NFC: consulta y ciclo de vida auditado.
 - [ ] Módulo Plus: derechos, origen, periodo, concesión/revocación con motivo.
@@ -99,7 +102,8 @@ Estado actualizado: 21-11-2026. Rama de trabajo: `develop/huellik-v2`.
 - [ ] Revisión del propietario y aprobación explícita antes de publicar/merge a `main`.
 
 ## Implementación actual
-- `admin.html`: resumen de solo lectura y formulario/tabla de promociones preparados; las operaciones de promociones esperan el despliegue del backend seguro.
+- `admin.html`: resumen de solo lectura y módulo de promociones conectado a `admin-promotions`.
 - `index.html`: muestra el acceso a Administración solo cuando la función de servidor autoriza la cuenta.
 - `supabase/functions/admin-overview`: endpoint activo, JWT obligatorio.
+- `supabase/functions/admin-promotions`: endpoint activo, JWT obligatorio; tablas privadas y RPC aplicadas.
 - `public.pets` sigue siendo la fuente actual del recuento de mascotas; no se ha migrado información a `petlink.pets`.
