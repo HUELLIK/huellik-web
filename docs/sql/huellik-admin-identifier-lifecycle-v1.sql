@@ -24,7 +24,7 @@ begin
   if not exists(select 1 from petlink.admin_users a where a.user_id=v_user_id and a.role='owner') then
     raise insufficient_privilege using message='Administrator access required';
   end if;
-  if p_action not in ('activate','mark_lost','mark_found','disable','replace') then
+  if p_action is null or p_action not in ('activate','mark_lost','mark_found','disable','replace') then
     raise invalid_parameter_value using message='Unsupported identifier action';
   end if;
   if char_length(v_reason)<8 or char_length(v_reason)>300 then
