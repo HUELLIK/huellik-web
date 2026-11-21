@@ -20,7 +20,8 @@ Estado: tablas y RPC aplicadas en Supabase; Edge Function `admin-promotions` des
 - Tablas `petlink` permanecen privadas.
 - SQL con `search_path = ''` y nombres cualificados.
 - Las redenciones se conservan; nunca se elimina físicamente un código.
-- La función de administración no valida un carrito ni confirma descuentos: esa tarea pertenece al endpoint de validación y reserva transaccional, previo al checkout.
+- `validate-promo` comprueba elegibilidad en servidor, pero no calcula precio final ni reserva el uso.
+- La reserva atómica y el cálculo final siguen pendientes del checkout con catálogo y precios definitivos.
 
 ## Alcances actuales
 `all`, `plus_monthly`, `plus_annual`, `tag_metal`, `tag_flex`.
