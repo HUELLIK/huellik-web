@@ -24,6 +24,7 @@ begin
   end if;
 
   if p_code is null or char_length(trim(p_code)) not between 3 and 40
+     or p_scope is null
      or p_scope not in ('plus_monthly','plus_annual','tag_metal','tag_flex') then
     raise invalid_parameter_value using message = 'Invalid promotion request';
   end if;
