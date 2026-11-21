@@ -28,6 +28,17 @@ td strong{color:var(--navy)}
 .checkline input{width:auto}
 .promo-empty{padding:22px;text-align:center;border:1px dashed #d4dfdb;border-radius:12px;color:var(--muted);font-size:12px}
 @media(max-width:720px){.promo-form{grid-template-columns:1fr}.field.full,.form-actions{grid-column:auto}}
+.users-toolbar{display:flex;justify-content:space-between;gap:12px;align-items:end;flex-wrap:wrap;margin:18px 0}
+.users-search{display:flex;gap:8px;align-items:end;flex:1;min-width:min(100%,280px)}
+.users-search .field{flex:1;min-width:180px}
+.users-pagination{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:15px}
+.users-pagination .btn{min-width:88px}
+.users-empty{padding:24px;text-align:center;color:var(--muted);border:1px dashed #d4dfdb;border-radius:12px}
+.user-primary{font-weight:800;color:var(--navy)}
+.user-secondary{font-size:10px;color:var(--muted);margin-top:3px}
+.user-pill{display:inline-flex;border-radius:30px;padding:5px 8px;font-size:10px;font-weight:800;background:#edf4f1;color:#387d70}
+.user-pill.off{background:#f1f2f2;color:#6c777c}
+
 @media(max-width:1050px){.cards{grid-template-columns:repeat(3,minmax(0,1fr))}.layout{grid-template-columns:215px 1fr}}
 @media(max-width:720px){.layout{display:block}.sidebar{padding:15px 16px;gap:14px}.brand{padding:0 3px}.sidebar .side-label,.sidebar-foot{display:none}.nav{display:flex;overflow-x:auto;padding-bottom:2px}.nav button{white-space:nowrap;padding:9px 11px;font-size:11px}.main{padding:22px 15px 40px}.topbar{align-items:flex-start;flex-direction:column;margin-bottom:20px}.cards{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.kpi{padding:15px;min-height:112px}.kpi-value{font-size:29px}.section-grid{grid-template-columns:1fr}.panel{padding:18px}}
 </style>
@@ -52,7 +63,7 @@ td strong{color:var(--navy)}
     <div><div class="side-label">Gestión del negocio</div><nav class="nav" aria-label="Secciones de administración">
       <button class="active" data-view="overview">▦　Resumen</button>
       <button data-view="promotions">◇　Promociones</button>
-      <button disabled title="Pendiente de conectar el backend">♙　Usuarios</button>
+      <button data-view="users">♙　Usuarios</button>
       <button disabled title="Pendiente de conectar el backend">♡　Mascotas y QR/NFC</button>
       <button disabled title="Pendiente de conectar el backend">✧　HUËLLIK Plus</button>
       <button disabled title="Pendiente de conectar el backend">▤　Pedidos y envíos</button>
@@ -105,6 +116,18 @@ td strong{color:var(--navy)}
       <div class="table-wrap"><table><thead><tr><th>CÓDIGO</th><th>DESCUENTO</th><th>APLICACIÓN</th><th>VIGENCIA</th><th>RESERVAS / CANJES</th><th>ESTADO</th><th>ACCIONES</th></tr></thead><tbody id="promoRows"><tr><td colspan="7">Cargando…</td></tr></tbody></table></div>
       <p class="footnote">Desactivar conserva el historial. Los límites y la validez se vuelven a comprobar en servidor al validar y reservar el descuento en el checkout. Stripe y los cobros siguen desactivados.</p>
     </section>
+    <section id="usersView" class="panel hidden">
+      <div class="promo-toolbar"><div><div class="eyebrow">Cuentas y clientes</div><h2 style="font-size:23px;margin:7px 0;color:var(--navy)">Usuarios registrados</h2><p>Consulta cuentas, mascotas vinculadas, pedidos y estado de suscripción. Esta primera versión es de solo lectura.</p></div><span class="pill">Solo propietario</span></div>
+      <form id="usersSearchForm" class="users-toolbar">
+        <div class="field users-search"><div class="field" style="width:100%"><label for="usersQuery">BUSCAR POR NOMBRE O CORREO</label><input id="usersQuery" maxlength="80" placeholder="Ej. María o correo@ejemplo.com"></div></div>
+        <button class="btn" id="usersSearchBtn" type="submit">Buscar</button>
+        <button class="btn light" id="usersClearBtn" type="button">Limpiar</button>
+      </form>
+      <div id="usersStatus" class="status">Cargando usuarios…</div>
+      <div class="table-wrap"><table style="min-width:850px"><thead><tr><th>USUARIO</th><th>CUENTA</th><th>ALTA</th><th>MASCOTAS</th><th>PEDIDOS</th><th>HUËLLIK PLUS</th></tr></thead><tbody id="usersRows"><tr><td colspan="6">Cargando…</td></tr></tbody></table></div>
+      <div class="users-pagination"><span id="usersPageInfo" class="muted">—</span><div class="table-actions"><button class="btn light" id="usersPrev" type="button" disabled>Anterior</button><button class="btn light" id="usersNext" type="button" disabled>Siguiente</button></div></div>
+      <p class="footnote">No se muestran teléfonos, direcciones ni datos de pago. No se permite bloquear o borrar cuentas desde esta versión.</p>
+    </section>
   </main>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -114,6 +137,8 @@ const SUPABASE_PUBLISHABLE_KEY='sb_publishable_rvcx4MOwK9sxgcnx4ohmHg_9EQqYJYl';
 const client=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
 const el=id=>document.getElementById(id);
 let promotions=[];
+let userPage=0,userQuery="",userTotal=0;
+const USER_PAGE_SIZE=20;
 const scopesLabels={all:"Todos",plus_monthly:"Plus mensual",plus_annual:"Plus anual",tag_metal:"Etiqueta metálica",tag_flex:"Etiqueta flexible"};
 function escapeHtml(value){return String(value??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 function promoStatus(message,error=false){const node=el("promoStatus");node.textContent=message;node.classList.toggle("error",error)}
@@ -163,10 +188,48 @@ async function savePromotion(event){
  catch(e){promoStatus(e.message,true)}
  finally{el("promoSave").disabled=false;el("promoSave").textContent=el("promoId").value?"Guardar cambios":"Crear código"}
 }
+function usersStatus(message,error=false){const node=el("usersStatus");node.textContent=message;node.classList.toggle("error",error)}
+function subscriptionLabel(user){
+ const status=user.subscription_status;
+ if(!status)return '<span class="user-pill off">Sin suscripción</span>';
+ const labels={active:"Activa",trialing:"Prueba",past_due:"Pendiente",cancelled:"Cancelada",expired:"Caducada"};
+ const active=["active","trialing"].includes(status);
+ const interval=user.subscription_interval==="monthly"?"mensual":user.subscription_interval==="annual"?"anual":"";
+ return '<span class="user-pill '+(active?"":"off")+'">'+escapeHtml(labels[status]||status)+'</span>'+(interval?'<div class="user-secondary">'+escapeHtml(interval)+'</div>':"");
+}
+function renderUsers(rows){
+ const body=el("usersRows");
+ if(!rows.length){body.innerHTML='<tr><td colspan="6"><div class="users-empty">No se han encontrado usuarios.</div></td></tr>';return}
+ body.innerHTML=rows.map(u=>{
+  const name=escapeHtml(u.display_name||"Sin nombre");
+  const email=escapeHtml(u.email||"");
+  const verified=u.email_verified?'<span class="user-pill">Verificado</span>':'<span class="user-pill off">Sin verificar</span>';
+  const owner=u.is_owner?'<div class="user-secondary">Cuenta propietaria</div>':"";
+  return '<tr><td><div class="user-primary">'+name+'</div><div class="user-secondary">'+email+'</div>'+owner+'</td><td>'+verified+'</td><td>'+escapeHtml(localDate(u.created_at))+'</td><td>'+Number(u.pet_count||0).toLocaleString("es-ES")+'</td><td>'+Number(u.order_count||0).toLocaleString("es-ES")+'</td><td>'+subscriptionLabel(u)+'</td></tr>';
+ }).join("");
+}
+async function loadUsers(){
+ el("usersSearchBtn").disabled=true;usersStatus("Buscando usuarios…");
+ try{
+  const {data,error}=await client.functions.invoke("admin-users",{body:{query:userQuery,limit:USER_PAGE_SIZE,offset:userPage*USER_PAGE_SIZE}});
+  if(error){const status=error.context?.status;if(status===401)throw new Error("Tu sesión ha caducado. Vuelve a iniciar sesión.");if(status===403)throw new Error("Tu cuenta no tiene permisos de propietario.");throw new Error(error.message||"No se pudo cargar el directorio.");}
+  if(data?.error)throw new Error(data.error);
+  const result=data?.data;
+  if(!result||!Array.isArray(result.users)||!Number.isInteger(result.total))throw new Error("El servidor devolvió una respuesta no válida.");
+  userTotal=result.total;renderUsers(result.users);
+  const first=userTotal===0?0:userPage*USER_PAGE_SIZE+1;
+  const last=Math.min((userPage+1)*USER_PAGE_SIZE,userTotal);
+  el("usersPageInfo").textContent=userTotal?"Mostrando "+first+"–"+last+" de "+userTotal+" usuarios":"0 usuarios";
+  el("usersPrev").disabled=userPage===0;
+  el("usersNext").disabled=(userPage+1)*USER_PAGE_SIZE>=userTotal;
+  usersStatus("Directorio actualizado · Solo lectura.");
+ }catch(e){usersStatus(e.message,true);el("usersRows").innerHTML='<tr><td colspan="6"><div class="users-empty">No se han podido cargar los usuarios.</div></td></tr>';el("usersPageInfo").textContent="—";el("usersPrev").disabled=true;el("usersNext").disabled=true;}
+ finally{el("usersSearchBtn").disabled=false;}
+}
 function switchView(view){
- const isPromotions=view==="promotions";el("overviewView").classList.toggle("hidden",isPromotions);el("promotionsView").classList.toggle("hidden",!isPromotions);
+ const isPromotions=view==="promotions",isUsers=view==="users";el("overviewView").classList.toggle("hidden",isPromotions||isUsers);el("promotionsView").classList.toggle("hidden",!isPromotions);el("usersView").classList.toggle("hidden",!isUsers);
  document.querySelectorAll("[data-view]").forEach(b=>b.classList.toggle("active",b.dataset.view===view));
- if(isPromotions)loadPromotions();
+ if(isPromotions)loadPromotions();if(isUsers)loadUsers();
 }
 function showGate(message){el('authGate').classList.remove('hidden');el('app').classList.add('hidden');el('deniedGate').classList.add('hidden');if(message)el('gateMessage').textContent=message}
 function showDenied(){el('deniedGate').classList.remove('hidden');el('authGate').classList.add('hidden');el('app').classList.add('hidden')}
@@ -204,6 +267,10 @@ document.querySelectorAll("[data-view]").forEach(b=>b.addEventListener("click",(
 el("promoForm").addEventListener("submit",savePromotion);
 el("promoReset").addEventListener("click",resetPromoForm);
 el("promoType").addEventListener("change",updatePromoValueHelp);
+el("usersSearchForm").addEventListener("submit",event=>{event.preventDefault();userQuery=el("usersQuery").value.trim();userPage=0;loadUsers()});
+el("usersClearBtn").addEventListener("click",()=>{el("usersQuery").value="";userQuery="";userPage=0;loadUsers()});
+el("usersPrev").addEventListener("click",()=>{if(userPage>0){userPage--;loadUsers()}});
+el("usersNext").addEventListener("click",()=>{if((userPage+1)*USER_PAGE_SIZE<userTotal){userPage++;loadUsers()}});
 resetPromoForm();
 el('recheckBtn').addEventListener('click',loadOverview);
 el('logoutBtn').addEventListener('click',async()=>{await client.auth.signOut();showGate('Has cerrado sesión. Puedes volver a Mi cuenta para acceder a HUËLLIK.')});
