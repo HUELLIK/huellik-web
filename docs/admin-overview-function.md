@@ -51,7 +51,9 @@ Los recuentos reflejan el estado en el momento de la prueba, no valores fijos. L
 
 - Probar el endpoint HTTP completo desde una sesión real del propietario y desde una cuenta normal. Las pruebas actuales validan la RPC y la barrera JWT configurada, pero no sustituyen una prueba extremo a extremo con sesiones reales.
 - Revisar si el dominio de producción definitivo necesita añadirse a `HUELLIK_ALLOWED_ORIGINS`.
-- Integrar la llamada en la interfaz privada `/admin` de la rama de desarrollo.
+- [x] Crear `admin.html` con panel privado, resumen y módulos futuros desactivados hasta disponer de sus funciones backend.
+- [x] Mostrar el acceso desde el dashboard y menú solo cuando `admin-overview` autoriza la cuenta.
+- [ ] Probar el flujo extremo a extremo en la URL de preview de Vercel con una sesión real del propietario y una cuenta normal.
 
 ## Límites
 
