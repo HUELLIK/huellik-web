@@ -58,7 +58,7 @@ begin
     from petlink.promo_codes p
     left join lateral (
       select
-        count(*) filter (where status = 'reserved')::integer as reserved_count,
+        count(*) filter (where status = 'reserved' and reserved_at > now() - interval '30 minutes')::integer as reserved_count,
         count(*) filter (where status = 'redeemed')::integer as redeemed_count
       from petlink.promo_redemptions pr
       where pr.promo_code_id = p.id
