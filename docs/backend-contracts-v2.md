@@ -21,13 +21,12 @@ Métodos: GET, POST, PATCH, DELETE lógico.
 - DELETE: desactivar (soft delete), nunca borrar redenciones.
 - Todas las operaciones requieren rol owner.
 
-### `validate-promo`
-Entrada: code, cart items / plan, currency.
-- Normalizar código en servidor.
-- Validar active, starts_at, expires_at, scope, currency, primer pedido y límites.
-- Calcular el descuento en servidor sobre subtotal elegible.
-- No crear redención definitiva en esta fase.
-- Responder con importe final calculado y motivo genérico si no es válido; nunca filtrar límites o datos de otros usuarios.
+### `validate-promo` (v1 desplegada)
+Entrada: code y scope (Plus mensual/anual, etiqueta metálica/flexible).
+- Normalizar código y validar active, starts_at, expires_at, scope, primer cliente y límites actuales.
+- No acepta precio/subtotal desde el navegador, no calcula importe final y no reserva canje.
+- Devuelve tipo/valor configurado y elegibilidad; el checkout debe volver a validar y reservar atómicamente.
+- Respuesta genérica si no es válido; no filtra límites ni datos de otros usuarios.
 
 ### `create-checkout`
 Entrada: tipo de compra, productos/plan, identificador de mascota opcional y código promocional opcional.
