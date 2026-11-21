@@ -52,8 +52,8 @@ Deno.serve(async (req: Request) => {
   const limit = input.limit === undefined ? 20 : input.limit;
   const offset = input.offset === undefined ? 0 : input.offset;
   if (typeof query !== "string" || query.length > 80 ||
-      !Number.isInteger(limit) || (limit as number) < 1 || (limit as number) > 50 ||
-      !Number.isInteger(offset) || (offset as number) < 0 || (offset as number) > 100000) {
+      typeof limit !== "number" || !Number.isInteger(limit) || limit < 1 || limit > 50 ||
+      typeof offset !== "number" || !Number.isInteger(offset) || offset < 0 || offset > 100000) {
     return response({ error: "Invalid search parameters" }, 400, origin);
   }
 
