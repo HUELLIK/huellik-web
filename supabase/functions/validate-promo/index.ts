@@ -1,10 +1,11 @@
 import { createClient } from "npm:@supabase/supabase-js@2.95.0";
 
-const ALLOWED_ORIGINS = new Set([
-  "https://huellik-web.vercel.app",
-  "http://localhost:3000",
-  "http://127.0.0.1:3000",
-]);
+function allowedOrigins(): Set<string> {
+  const configured = Deno.env.get("HUELLIK_ALLOWED_ORIGINS");
+  return new Set(configured
+    ? configured.split(",").map((v) => v.trim()).filter(Boolean)
+    : ["https://huellik-web.vercel.app", "http://localhost:3000", "http://127.0.0.1:3000"]);
+}
 
 function response(body: Record<string, unknown>, status: number, origin: string | null): Response {
   const headers: Record<string, string> = {
@@ -14,7 +15,7 @@ function response(body: Record<string, unknown>, status: number, origin: string 
     "Access-Control-Allow-Headers": "authorization, apikey, content-type, x-client-info",
     "Access-Control-Allow-Methods": "POST, OPTIONS",
   };
-  if (origin && ALLOWED_ORIGINS.has(origin)) headers["Access-Control-Allow-Origin"] = origin;
+  if (origin && allowedOrigins().has(origin)) headers["Access-Control-Allow-Origin"] = origin;
   return new Response(JSON.stringify(body), { status, headers });
 }
 
@@ -30,7 +31,7 @@ function publishableKey(): string {
 
 Deno.serve(async (req: Request) => {
   const origin = req.headers.get("origin");
-  if (origin && !ALLOWED_ORIGINS.has(origin)) {
+  if (origin && !allowedOrigins().has(origin)) {
     return response({ error: "Origin not allowed" }, 403, null);
   }
   if (req.method === "OPTIONS") {
@@ -40,7 +41,7 @@ Deno.serve(async (req: Request) => {
         "Vary": "Origin",
         "Access-Control-Allow-Headers": "authorization, apikey, content-type, x-client-info",
         "Access-Control-Allow-Methods": "POST, OPTIONS",
-        ...(origin && ALLOWED_ORIGINS.has(origin) ? { "Access-Control-Allow-Origin": origin } : {}),
+        ...(origin && allowedOrigins().has(origin) ? { "Access-Control-Allow-Origin": origin } : {}),
       },
     });
   }
