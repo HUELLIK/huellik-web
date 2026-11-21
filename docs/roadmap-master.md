@@ -42,7 +42,11 @@ Estado actualizado: 21-11-2026. Rama de trabajo: `develop/huellik-v2`.
   - [x] Comprobar vigencia, estado, alcance, primer cliente y límites actuales.
   - [x] Ignorar reservas antiguas (ventana de 30 minutos) en validación y métricas.
   - [ ] Implementar reserva atómica durante create-checkout con precio autoritativo.
-- [ ] Módulo usuarios: búsqueda mínima y estado.
+- [x] Módulo usuarios: directorio de solo lectura, búsqueda por nombre/correo y paginación.
+  - [x] Mostrar fecha de alta, verificación de correo, mascotas actuales, pedidos y último estado de suscripción.
+  - [x] Limitar datos personales visibles; no mostrar teléfonos, direcciones ni datos de pago.
+  - [x] Proteger con RPC owner-only y Edge Function con JWT.
+  - [ ] Probar desde la sesión real del propietario en la preview.
 - [ ] Módulo mascotas/QR/NFC: consulta y ciclo de vida auditado.
 - [ ] Módulo Plus: derechos, origen, periodo, concesión/revocación con motivo.
 - [ ] Módulo pedidos y envíos.
@@ -109,4 +113,5 @@ Estado actualizado: 21-11-2026. Rama de trabajo: `develop/huellik-v2`.
 - `index.html`: muestra el acceso a Administración solo cuando la función de servidor autoriza la cuenta.
 - `supabase/functions/admin-overview`: endpoint activo, JWT obligatorio.
 - `supabase/functions/admin-promotions`: endpoint activo, JWT obligatorio; tablas privadas y RPC aplicadas.
+- `supabase/functions/admin-users`: endpoint activo, JWT obligatorio; directorio owner-only de solo lectura.
 - `public.pets` sigue siendo la fuente actual del recuento de mascotas; no se ha migrado información a `petlink.pets`.
