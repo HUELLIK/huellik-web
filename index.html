@@ -89,11 +89,11 @@ function renderPlusStatus(){$('plusPromoBox')?.classList.toggle('hidden',plusAct
 async function refreshFamilyPanel(){
  if(!currentPet)return;const {data,error}=await supabaseClient.rpc('huellik_family_v1',{p_action:'list',p_pet_id:currentPet.id,p_email:null,p_role:'viewer',p_token:null});
  if(error){$('familyRoleInfo').textContent='No se pudo cargar la gestión familiar.';return}
- const owner=!!data?.is_owner,role=data?.my_role||'viewer';
- $('familyRoleInfo').textContent=owner?'Eres propietario/a y puedes invitar o retirar miembros.':'Tu permiso actual: '+role+'. '+(role==='viewer'?'Puedes consultar la ficha, pero no modificarla.':'Puedes editar la ficha y los contactos.');
- $('familyInviteControls').classList.toggle('hidden',!owner);
+ const owner=!!data?.is_owner,canManage=!!data?.can_manage,role=data?.my_role||'viewer';
+ $('familyRoleInfo').textContent=owner?'Eres propietario/a y puedes gestionar los accesos.':canManage?'Tienes permisos de administración familiar.':'Tu permiso actual: '+role+'. '+(role==='viewer'?'Puedes consultar la ficha, pero no modificarla.':'Puedes editar la ficha y los contactos.');
+ $('familyInviteControls').classList.toggle('hidden',!canManage);
  const members=data?.members||[];
- $('familyMembers').innerHTML=members.map(m=>'<div class="contact-item"><div><strong>'+esc(m.email)+'</strong><small>Permiso: '+esc(m.role)+'</small></div>'+(owner?'<button class="btn danger" onclick="removeFamilyMember(\''+m.user_id+'\')">Retirar</button>':'')+'</div>').join('')||'<p class="muted">Todavía no hay familiares invitados.</p>';
+ $('familyMembers').innerHTML=members.map(m=>'<div class="contact-item"><div><strong>'+esc(m.email)+'</strong><small>Permiso: '+esc(m.role)+'</small></div>'+(canManage?'<button class="btn danger" onclick="removeFamilyMember(\''+m.user_id+'\')">Retirar</button>':'')+'</div>').join('')||'<p class="muted">Todavía no hay familiares invitados.</p>';
 }
 async function inviteFamilyMember(){
  if(!currentPet)return;const email=$('familyEmail').value.trim(),role=$('familyRole').value;
