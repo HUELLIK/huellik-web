@@ -172,5 +172,6 @@ begin
 end;
 $function$;
 
+revoke all on function public.resolve_public_pet_profile_legacy(text) from public, anon, authenticated;
 revoke all on function public.resolve_public_pet_profile(text) from public;
 grant execute on function public.resolve_public_pet_profile(text) to anon, authenticated;
