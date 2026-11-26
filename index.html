@@ -141,7 +141,7 @@ function renderTagActivation(code,draft={}){
   </form><p class="muted" style="text-align:center;margin-top:20px">¿Ya tienes cuenta? <a href="#" onclick="openTagLogin();return false" style="color:var(--t);font-weight:800">Inicia sesión</a></p></div></div>`;
 }
 function openTagLogin(){if(pendingTagCode){const d=JSON.parse(localStorage.getItem(tagDraftKey(pendingTagCode))||'null');if(d)saveTagDraftFromForm()}openModal('login');$('authstatus').textContent='Inicia sesión para activar tu chapa.'}
-$('actPetPhoto')?.addEventListener('change',e=>{const f=e.target.files?.[0],img=$('actPetPhotoPreview');if(!img)return;if(f){if(f.size>5242880){e.target.value='';toast('La foto no puede superar 5 MB.');return}img.src=URL.createObjectURL(f);img.classList.remove('hidden')}else img.classList.add('hidden')});
+document.addEventListener('change',e=>{if(e.target?.id!=='actPetPhoto')return;const file=e.target.files?.[0],img=$('actPetPhotoPreview');if(!img)return;if(file){if(file.size>5242880){e.target.value='';toast('La foto no puede superar 5 MB.');return}img.src=URL.createObjectURL(file);img.classList.remove('hidden')}else img.classList.add('hidden')});
 function saveTagDraftFromForm(){
  const draft={name:tagFormValue('actPetName'),species:tagFormValue('actSpecies'),breed:tagFormValue('actBreed'),birth_date:tagFormValue('actBirth'),color:tagFormValue('actColor'),public_description:tagFormValue('actDescription'),medical_alerts:tagFormValue('actMedical'),contact_name:tagFormValue('actContactName'),phone:tagFormValue('actPhone'),email:tagFormValue('actEmail'),pin:tagFormValue('actPin')};
  if(pendingTagCode)localStorage.setItem(tagDraftKey(pendingTagCode),JSON.stringify(draft));
