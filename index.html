@@ -49,7 +49,7 @@ footer{background:#10283d;color:white;padding:40px 0 22px}.foot{display:flex;jus
 <div class="field"><label for="alertCity">Ciudad o municipio *</label><input id="alertCity" maxlength="100" required placeholder="Ej. Córdoba"></div>
 <div class="field"><label for="alertArea">Barrio o zona aproximada</label><input id="alertArea" maxlength="100" placeholder="Nunca pongas una dirección exacta"></div>
 <div class="field"><label for="alertLastSeen">Fecha y hora aproximada</label><input id="alertLastSeen" type="datetime-local"></div>
-<div class="field"><label for="alertPhoto">Enlace a una foto (opcional)</label><input id="alertPhoto" type="url" placeholder="https://..."></div>
+<div class="field"><label for="alertPhoto">Enlace a una foto (opcional)</label><input id="alertPhoto" type="url" placeholder="https://..."></div><div class="field"><label for="alertPhone">Teléfono de contacto (público)</label><input id="alertPhone" type="tel" maxlength="30" placeholder="Tu teléfono"></div><div class="field"><label for="alertEmail">Email de contacto (público)</label><input id="alertEmail" type="email" maxlength="254" placeholder="tu@email.com"></div>
 <div class="field full"><label for="alertDescription">Detalles para reconocerla</label><textarea id="alertDescription" maxlength="700" placeholder="Color, tamaño, collar, comportamiento…"></textarea></div>
 </div><div class="form-actions"><button class="btn" id="publishAlertBtn" type="submit">Publicar aviso</button></div><p id="alertFormStatus" class="muted" role="status"></p></form>
 <div class="divider" style="margin:20px 0;border-top:1px solid var(--line)"></div><h3>Mis avisos</h3><div id="myAlertsList" class="alert-grid"><div class="empty">Todavía no has publicado avisos.</div></div>
@@ -92,12 +92,12 @@ function speciesLabel(s){return s==='dog'?'Perro':s==='cat'?'Gato':'Otra mascota
 function alertTypeLabel(t){return t==='lost'?'MASCOTA PERDIDA':t==='found'?'MASCOTA ENCONTRADA':'AVISTAMIENTO'}
 async function loadPublicAlerts(){
  const city=($('alertCityFilter')?.value||'').trim();
- let q=supabaseClient.from('pet_alerts').select('id,alert_type,pet_name,species,city,area,description,photo_url,last_seen_at,pet_public_id,created_at').eq('status','active').gt('expires_at',new Date().toISOString()).order('created_at',{ascending:false}).limit(60);
+ let q=supabaseClient.from('pet_alerts').select('id,alert_type,pet_name,species,city,area,description,photo_url,last_seen_at,pet_public_id,contact_phone,contact_email,created_at').eq('status','active').gt('expires_at',new Date().toISOString()).order('created_at',{ascending:false}).limit(60);
  if(city)q=q.ilike('city','%'+city+'%');
  const {data,error}=await q;
  if(error){$('publicAlertsList').innerHTML='<div class="alert-empty">No se pudieron cargar los avisos. Inténtalo de nuevo.</div>';return}
  const items=data||[];
- $('publicAlertsList').innerHTML=items.length?items.map(a=>'<article class="alert-card">'+(a.photo_url?'<img src="'+esc(a.photo_url)+'" alt="Foto de '+esc(a.pet_name)+'">':'')+'<span class="alert-tag '+esc(a.alert_type)+'">'+alertTypeLabel(a.alert_type)+'</span><h3>'+esc(a.pet_name)+'</h3><div class="alert-meta">'+esc(speciesLabel(a.species))+' · '+esc(a.city)+(a.area?' · '+esc(a.area):'')+'</div>'+(a.description?'<p>'+esc(a.description)+'</p>':'')+(a.last_seen_at?'<div class="alert-meta">Fecha del aviso: '+new Date(a.last_seen_at).toLocaleString('es-ES')+'</div>':'')+(a.pet_public_id?'<a class="btn secondary" href="/?code='+encodeURIComponent(a.pet_public_id)+'">Ver ficha HUËLLIK</a>':'')+'</article>').join(''):'<div class="alert-empty">No hay avisos activos'+(city?' en '+esc(city):'')+'. Si conoces un caso, puedes ayudar publicándolo.</div>';
+ $('publicAlertsList').innerHTML=items.length?items.map(a=>'<article class="alert-card">'+(a.photo_url?'<img src="'+esc(a.photo_url)+'" alt="Foto de '+esc(a.pet_name)+'">':'')+'<span class="alert-tag '+esc(a.alert_type)+'">'+alertTypeLabel(a.alert_type)+'</span><h3>'+esc(a.pet_name)+'</h3><div class="alert-meta">'+esc(speciesLabel(a.species))+' · '+esc(a.city)+(a.area?' · '+esc(a.area):'')+'</div>'+(a.description?'<p>'+esc(a.description)+'</p>':'')+(a.last_seen_at?'<div class="alert-meta">Fecha del aviso: '+new Date(a.last_seen_at).toLocaleString('es-ES')+'</div>':'')+(a.contact_phone?'<a class="btn secondary" href="tel:'+esc(a.contact_phone.replace(/[^+\\d]/g,''))+'">Llamar</a>':'')+(a.contact_email?'<a class="btn secondary" href="mailto:'+esc(a.contact_email)+'">Email</a>':'')+(a.pet_public_id?'<a class="btn secondary" href="/?code='+encodeURIComponent(a.pet_public_id)+'">Ver ficha HUËLLIK</a>':'')+'</article>').join(''):'<div class="alert-empty">No hay avisos activos'+(city?' en '+esc(city):'')+'. Si conoces un caso, puedes ayudar publicándolo.</div>';
 }
 function refreshAlertPetOptions(){
  const s=$('alertLinkedPet');if(!s)return;
@@ -109,7 +109,8 @@ async function savePetAlert(e){
  const linkedId=$('alertLinkedPet').value||null;
  const linked=linkedId?petsCache.find(p=>p.id===linkedId):null;
  const type=$('alertType').value;
- const payload={owner_id:currentUser.id,pet_id:linkedId,alert_type:type,pet_name:$('alertPetName').value.trim(),species:linked?.species||$('alertSpecies').value,city:$('alertCity').value.trim(),area:$('alertArea').value.trim()||null,last_seen_at:$('alertLastSeen').value?new Date($('alertLastSeen').value).toISOString():null,photo_url:$('alertPhoto').value.trim()||null,description:$('alertDescription').value.trim()||null,pet_public_id:linked?.public_id||null};
+ if(!linkedId&&!$('alertPhone').value.trim()&&!$('alertEmail').value.trim()){setStatus('alertFormStatus','Añade un teléfono o email de contacto para que puedan ayudarte.',true);return}
+ const payload={owner_id:currentUser.id,pet_id:linkedId,alert_type:type,pet_name:$('alertPetName').value.trim(),species:linked?.species||$('alertSpecies').value,city:$('alertCity').value.trim(),area:$('alertArea').value.trim()||null,last_seen_at:$('alertLastSeen').value?new Date($('alertLastSeen').value).toISOString():null,photo_url:$('alertPhoto').value.trim()||null,contact_phone:$('alertPhone').value.trim()||null,contact_email:$('alertEmail').value.trim()||null,description:$('alertDescription').value.trim()||null,pet_public_id:linked?.public_id||null};
  $('publishAlertBtn').disabled=true;setStatus('alertFormStatus','Publicando aviso…');
  try{const {error}=await supabaseClient.from('pet_alerts').insert(payload);if(error)throw error;$('alertForm').reset();refreshAlertPetOptions();setStatus('alertFormStatus','Aviso publicado. Gracias por ayudar.');await loadPublicAlerts();await loadMyAlerts();toast('Aviso publicado en HUËLLIK ALERTA.')}
  catch(err){setStatus('alertFormStatus',err.message||'No se pudo publicar el aviso.',true)}
