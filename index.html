@@ -93,7 +93,7 @@ function alertTypeLabel(t){return t==='lost'?'MASCOTA PERDIDA':t==='found'?'MASC
 async function loadPublicAlerts(){
  const city=($('alertCityFilter')?.value||'').trim();
  let q=supabaseClient.from('pet_alerts').select('id,alert_type,pet_name,species,city,area,description,photo_url,last_seen_at,pet_public_id,created_at').eq('status','active').gt('expires_at',new Date().toISOString()).order('created_at',{ascending:false}).limit(60);
- if(city)q=q.ilike('city',city);
+ if(city)q=q.ilike('city','%'+city+'%');
  const {data,error}=await q;
  if(error){$('publicAlertsList').innerHTML='<div class="alert-empty">No se pudieron cargar los avisos. Inténtalo de nuevo.</div>';return}
  const items=data||[];
@@ -117,11 +117,14 @@ async function savePetAlert(e){
 }
 async function loadMyAlerts(){
  if(!currentUser||!$('myAlertsList'))return;
- const {data,error}=await supabaseClient.from('pet_alerts').select('id,alert_type,pet_name,city,area,status,created_at').eq('owner_id',currentUser.id).order('created_at',{ascending:false}).limit(20);
+ const {data,error}=await supabaseClient.from('pet_alerts').select('id,pet_id,alert_type,pet_name,city,area,status,created_at').eq('owner_id',currentUser.id).order('created_at',{ascending:false}).limit(20);
  if(error){$('myAlertsList').innerHTML='<div class="alert-empty">No se pudieron cargar tus avisos.</div>';return}
  $('myAlertsList').innerHTML=data?.length?data.map(a=>'<article class="alert-card"><span class="alert-tag '+esc(a.alert_type)+'">'+alertTypeLabel(a.alert_type)+'</span><h3>'+esc(a.pet_name)+'</h3><div class="alert-meta">'+esc(a.city)+(a.area?' · '+esc(a.area):'')+' · '+(a.status==='active'?'Activo':a.status==='reunited'?'Reunido':'Cerrado')+'</div>'+(a.status==='active'?'<button class="btn secondary" type="button" onclick="resolvePetAlert(\''+a.id+'\')">Marcar como resuelto</button>':'')+'</article>').join(''):'<div class="alert-empty">Todavía no has publicado avisos.</div>';
 }
 async function resolvePetAlert(id){
+ const {data:alert,error:readError}=await supabaseClient.from('pet_alerts').select('pet_id,alert_type').eq('id',id).single();
+ if(readError){toast('No se pudo cargar el aviso: '+readError.message);return}
+ if(alert?.alert_type==='lost'&&alert.pet_id){const petUpdate=await supabaseClient.from('pets').update({is_lost:false}).eq('id',alert.pet_id);if(petUpdate.error){toast('No se pudo actualizar la ficha: '+petUpdate.error.message);return}}
  const {error}=await supabaseClient.from('pet_alerts').update({status:'reunited',updated_at:new Date().toISOString()}).eq('id',id);
  if(error){toast('No se pudo actualizar el aviso: '+error.message);return}
  await loadMyAlerts();await loadPublicAlerts();toast('Aviso marcado como resuelto.')
