@@ -16,6 +16,8 @@ create table if not exists public.pet_alerts (
   photo_url text,
   last_seen_at timestamptz,
   pet_public_id uuid,
+  contact_phone text,
+  contact_email text,
   status text not null default 'active' check (status in ('active','reunited','closed')),
   expires_at timestamptz not null default (now() + interval '30 days'),
   created_at timestamptz not null default now(),
